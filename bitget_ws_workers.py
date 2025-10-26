@@ -10,8 +10,8 @@ PUB_URL = "wss://wspap.bitget.com/v2/ws/public"
 
 def _now_ms(): return int(time.time()*1000)
 
-HEARTBEAT_INTERVAL = 30  # Bitget 권장
-HEARTBEAT_TIMEOUT  = 70  # pong 없을 때 재연결 유도
+HEARTBEAT_INTERVAL = 30  
+HEARTBEAT_TIMEOUT  = 70 
 
 def bitget_futures_book_ws_worker(cfg, shm_name_books: str, capacity: int, shared):
     instId = str(cfg.get("bitget_symbol"))
