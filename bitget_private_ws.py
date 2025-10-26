@@ -7,14 +7,13 @@ from layouts import PRIVATE_EXEC_DTYPE
 
 #PRV_URL = "wss://ws.bitget.com/v2/ws/private"
 PRV_URL ="wss://wspap.bitget.com/v2/ws/private" #Demo
-#API_KEY        = os.getenv('BITGET_API_KEY',        'bg_e06c596f7fb25fadf5bf491c026817ad')
-#API_SECRET     = os.getenv('BITGET_API_SECRET',     'ec5c829908079a8689793058e4107b8f2c4560721a59a9adce490f7cba00e5d2')
-API_PASSPHRASE = os.getenv('BITGET_PASSPHRASE',     'DavidLee')
-API_KEY = 'bg_14f76b755786f092e1c10d5465cc99e1' #Demo
-API_SECRET = '0cf81f298b9abb8a7b561269a6313a8e314e0669ce167921d5c767f51292d742' #Demo
-HEARTBEAT_INTERVAL = 20   # 권장: 30s
-HEARTBEAT_TIMEOUT  = 70   # 70s 내 pong 없으면 재연결
-
+#API_KEY        = os.getenv('BITGET_API_KEY',        '')
+#API_SECRET     = os.getenv('BITGET_API_SECRET',     '')
+API_PASSPHRASE = os.getenv('BITGET_PASSPHRASE',     '')
+API_KEY = '' #Demo
+API_SECRET = '' #Demo
+HEARTBEAT_INTERVAL = 20  
+HEARTBEAT_TIMEOUT  = 70  
 def _ts_ms_str(): return str(int(time.time() * 1000))
 
 def _sign(ts, method, path):
@@ -47,12 +46,12 @@ def _start_app_heartbeat(ws, last_pong: dict):
             try:
                 if not (ws.sock and ws.sock.connected):
                     break
-                ws.send("ping")  # ✅ Bitget 문자열 핑
+                ws.send("ping")  # Bitget 문자열 핑 받음 좀 이상함..자체 ping 보내면 반응없음
             except Exception:
                 break
             # pong 타임아웃 체크
             if int(time.time()*1000) - last_pong["ts"] > HEARTBEAT_TIMEOUT*1000:
-                try: ws.close()  # run_forever 루프 종료 → 바깥에서 재연결
+                try: ws.close()  # run_forever 루프 종료 -> 바깥에서 재연결
                 except: pass
                 break
     threading.Thread(target=_loop, daemon=True).start()
@@ -61,7 +60,7 @@ def bitget_private_ws_worker(cfg, shm_name_exec: str, capacity: int, shared):
     ring_exec = ShmRing(shm_name_exec, PRIVATE_EXEC_DTYPE, capacity, create=False)
 
     inst_type  = str(cfg.get("bitget_product_type", "USDT-FUTURES"))
-    inst_id    = "default"  # 모든 심볼
+    inst_id    = "default" 
     shared["bg_priv_state"] = "starting"
     last_pong = {"ts": int(time.time() * 1000)}
 
@@ -80,7 +79,7 @@ def bitget_private_ws_worker(cfg, shm_name_exec: str, capacity: int, shared):
 
     def on_open(ws):
         reset_backoff()                # 연결 성공 시 백오프 리셋
-        _start_app_heartbeat(ws, last_pong)  # 앱-레벨 ping
+        _start_app_heartbeat(ws, last_pong)  
         ts = _ts_ms_str()
 
         print(_sign(ts,"GET","/user/verify"))
@@ -148,14 +147,14 @@ def bitget_private_ws_worker(cfg, shm_name_exec: str, capacity: int, shared):
                     last_px = float(d.get("price") or d.get("fillPrice") or 0)
                     # 누적 체결은 fill에도 있을 수 있지만, 확실한 건 orders 쪽
                     acc_fill = float(d.get("accBaseVolume") or 0)
-                    # 상태는 fill엔 없거나 불명확 -> 0(live/중립)로
+                    # 상태는 fill엔 없거나 불명확 
                     status = 1
 
                 else:  # ch == "orders"
                     # 상태/누적/평균가 업데이트 역할
                     status = _status_to_code(d.get("status"))
                     acc_fill = float(d.get("accBaseVolume") or d.get("baseVolume") or 0)
-                    # orders에도 baseVolume가 실릴 때가 있지만, 여기선 "트리거"를 막기 위해 0으로 고정
+                    
                     last_fill = 0.0
                     last_px = float(d.get("fillPrice") or d.get("price") or 0)
 
@@ -169,12 +168,12 @@ def bitget_private_ws_worker(cfg, shm_name_exec: str, capacity: int, shared):
                 rec["status"] = status
                 rec["size"] = size0
                 rec["acc_fill"] = acc_fill
-                rec["last_fill"] = last_fill  # ★ fill에서만 >0, orders는 0
+                rec["last_fill"] = last_fill  #  fill에서만 >0, orders는 0
                 rec["last_price"] = last_px
                 rec["avg_price"] = avg_px
 
                 ring_exec.push(rec)
-                # print(rec)  # 필요하면 로깅
+                # print(rec)  
 
     def on_error(ws, err): shared["bg_priv_state"] = f"error:{err}"
     def on_close(ws, *a):  shared["bg_priv_state"] = "closed"
