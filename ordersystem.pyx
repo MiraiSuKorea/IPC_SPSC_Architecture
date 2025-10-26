@@ -48,11 +48,11 @@ cdef class Ordersystem:
         self._ws_authed = False
 
         # ⚠️ 기본값은 비워두는 게 안전하지만, 기존 코드 호환
-        #self._api_key    = <str>cfg.get("BITGET_API_KEY","bg_e06c596f7fb25fadf5bf491c026817ad")
-        #self._api_secret = <str>cfg.get("BITGET_API_SECRET","ec5c829908079a8689793058e4107b8f2c4560721a59a9adce490f7cba00e5d2")
-        self._api_key    = "bg_14f76b755786f092e1c10d5465cc99e1"
-        self._api_secret = "0cf81f298b9abb8a7b561269a6313a8e314e0669ce167921d5c767f51292d742"
-        self._api_pass   = "DavidLee"
+        #self._api_key    = <str>cfg.get("BITGET_API_KEY","")
+        #self._api_secret = <str>cfg.get("BITGET_API_SECRET","")
+        self._api_key    = ""
+        self._api_secret = ""
+        self._api_pass   = ""
         self._ws = None
         self._ws_lock = threading.Lock()
         self._ws_live = False
