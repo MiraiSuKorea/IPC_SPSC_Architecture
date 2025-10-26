@@ -1,14 +1,6 @@
 # cython: language_level=3
 # cython: boundscheck=False, wraparound=False, cdivision=True, nonecheck=False
-"""
-Binance Spot (orderbook L1 + trades) + Bitget Futures trades(price) 를 입력받아
-신호가 나올 때 Bitget 선물에 낼 실행가(exec_px)와 청산가(exit_px)를 계산해서
-ORDER_FLAGS 링에 push한다.
 
-- 실행가: maker 유지 위해 Binance L1 기준 ±5tick
-- 청산가: 최초 체결 즉시 반대 10tick (실행엔진이 exit_px 그대로 사용)
-- 속도우선: 예외/검증 최소화 (예외 발생 시 조용히 skip)
-"""
 
 import os
 from libc.math cimport floor
@@ -105,11 +97,8 @@ cdef class Avellaneda_Stoikov_marketmaking:
         if bb <= 0.0 or aa <= 0.0:
             return
 
-        # ===== 초경량 신호 (예시) =====
-        # - 매수: 체결가가 bid보다 충분히 낮게 찍힐 때
-        # - 매도: 체결가가 ask보다 충분히 높게 찍힐 때
-        # - Bitget 체결가가 Binance mid와 너무 동떨어져 있으면 skip (체결 레짐 불일치 방지)
-                # ===== 신호 판단 =====
+       
+        
         cdef double band = self.tick * 50.0
         cdef double mid_bi = 0.5 * (bb + aa)
         cdef int side = 0
