@@ -46,13 +46,9 @@ class ShmRing:
 
     # --- API
     def push(self, rec):
-        """
-        rec: dtype과 호환되는 단일 튜플/배열(스칼라 레코드). 1-엘리먼트 ndarray 말고 '튜플' 추천.
-        """
         head, tail = self._get_head_tail()
         nxt = (head + 1) % self.capacity
         if nxt == tail:
-            # 풀 → 가장 오래된 것 드랍(저지연 우선)
             tail = (tail + 1) % self.capacity
             self._set_tail(tail)
         self.arr[head] = rec
