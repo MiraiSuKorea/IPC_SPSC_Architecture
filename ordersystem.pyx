@@ -47,7 +47,7 @@ cdef class Ordersystem:
         self.running = False
         self._ws_authed = False
 
-        # ⚠️ 기본값은 비워두는 게 안전하지만, 기존 코드 호환
+       
         #self._api_key    = <str>cfg.get("BITGET_API_KEY","")
         #self._api_secret = <str>cfg.get("BITGET_API_SECRET","")
         self._api_key    = ""
